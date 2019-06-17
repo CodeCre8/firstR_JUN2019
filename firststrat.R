@@ -220,6 +220,7 @@ test_subset <- test["2016-11-05/2016-11-09"]
 # 5. Signals - add.signal()
 # ===============================================================
 # In this strategy, 4 types of signal will be used
+# ===============================================================
 # 5.1 sigComparison
 # Signify whether SMA50 > SMA200
 add.signal(strategy = strategy.st, name = "sigComparison",
@@ -276,8 +277,93 @@ add.signal(strategy = strategy.st, name = "sigFormula",
            )
 
 
-
-
+# ===============================================================
+# 6. Rules - add.rule()
+# ===============================================================
+# Add trading rules to enter/exit an asset based on the trading 
+# signals. Like signals and indicators, all rules reference a 
+# column already present in the strategy.
+# Rules relies on signals and must reference the signal columns
+# in the strategy to work right.
+# ===============================================================
+# 6.1 Exit Rule
+add.rule(strategy = strategy.st, name = "ruleSignal",
+         arguments = list(
+           # Use the signal "filterexit" set in the strategy:
+           # the SMA50 has crossed under SMA200
+           # Rule for this signal indicating the condition to exit 
+           # as the market is no longer conducive to the position.
+           sigcol = "filterexit",
+           # Specifying sigval to indicate whether the rule is triggered 
+           # when the signal value is TRUE or FALSE.
+           # To proceed with this exit rule, specify that a transaction
+           # should occcur when filterexit is equal to TRUE.
+           sigval = TRUE,
+           # orderqty: Set to "all" for liquidation of asset or
+           # set to an integer value of a number of shares
+           orderqty = "all",
+           # ordertype: 
+           # "market" for buy or sell the asset at the prevailing price.
+           # "limit" for certain price conditions are met (namely, if the price 
+           # falls below a certain further threshold on the day of the order)
+           # "stoplimit" for when price above a certain price
+           ordertype = "market",
+           # orderside:
+           # "long" is to classify a set of rules that profits by buying an asset 
+           # in the hopes that the asset's price will rise. 
+           # "short" is one that shorts a stock by selling an asset before owning it, 
+           # hoping to buy it back later at a lower price.
+           orderside = "long",
+           # replace when set to TRUE will cancel other signals in the strategy.
+           # set to FALSE is the good rule of thumb to keep other signals.
+           # Specifies whether or not to ignore all other signals on the same date 
+           # when the strategy acts upon one signal.
+           replace = FALSE,
+           # prefer indicates when it is favourable to enter a position. 
+           # Default is set to buy at the close of next day (bar).
+           # In Quantstrat, orders have a "next-bar" mechanism. There is a day lag
+           # bewteen observing signal and buying next day.
+           # This can be solved by placing orders to execute on the next
+           # possible bar: Open, High, Low, or Close price
+           prefer = "Open"),
+         type = "exit")
+# 6.2 Enter Rule
+# Create an entry rule of 1 share when all conditions line up
+add.rule(strategy = strategy.st, name = "ruleSignal",
+         arguments = list(
+           # Use the signal longentry set in the strategy:
+           # Specify that both longfilter and longthreshold must be TRUE
+           sigcol = "longentry",
+           # Set sigval to TRUE
+           sigval = TRUE,
+           # Set orderqty to 1
+           orderqty = 1,
+           ordertype = "market",
+           orderside = "long",
+           replace = FALSE,
+           prefer = "Open"),
+         type = "enter")
+# 6.3 Enter Rule with Order Sizing Function
+add.rule(strategy = strategy.st, name = "ruleSignal",
+         arguments = list(
+           sigcol = "longentry",
+           sigval = TRUE,
+           ordertype = "market",
+           orderside = "long",
+           replace = FALSE,
+           prefer = "Open",
+           # Use the osMaxDollar order size function
+           # osFUN - the constructs that allow quantstrat to vary the amount 
+           # of shares bought or sold are called order sizing functions. 
+           # The first thing to know is that when using an order sizing function, 
+           # the orderqty argument is no longer relevant, as the order quantity 
+           # is determined by the order sizing function, osFUN. The additional 
+           # arguments to this function are tradeSize and maxSize, both of which 
+           # should take tradesize, which we defined early on in our code.
+           osFUN = osMaxDollar,
+           tradeSide = tradesize,
+           maxSide = tradesize),
+         type = "enter")
 
 
 
