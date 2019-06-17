@@ -347,25 +347,16 @@ add.rule(strategy = strategy.st, name = "ruleSignal",
            prefer = "Open"),
          type = "enter")
 # 6.3 Enter Rule with Order Sizing Function
-add.rule(strategy = strategy.st, name = "ruleSignal",
-         arguments = list(
-           sigcol = "longentry",
-           sigval = TRUE,
-           ordertype = "market",
-           orderside = "long",
-           replace = FALSE,
-           prefer = "Open",
-           # Use the osMaxDollar order size function
-           # osFUN - the constructs that allow quantstrat to vary the amount 
-           # of shares bought or sold are called order sizing functions. 
-           # The first thing to know is that when using an order sizing function, 
-           # the orderqty argument is no longer relevant, as the order quantity 
-           # is determined by the order sizing function, osFUN. The additional 
-           # arguments to this function are tradeSize and maxSize, both of which 
-           # should take tradesize, which we defined early on in our code.
-           osFUN = "osMaxDollar"),
-         type = "enter"
-         )
+#add.rule(strategy = strategy.st, name = "ruleSignal",
+#         arguments = list(sigcol = "longentry", sigval = TRUE, ordertype = "market",
+#                          orderside = "long", replace = FALSE, prefer = "Open",
+#                          # Use the osFUN called osMaxDollar
+#                         osFUN = osMaxDollar,
+#                         # The tradeSize argument should be equal to tradesize (defined earlier)
+#                         tradeSize = tradesize,
+#                         # The maxSize argument should also be equal to tradesize.
+#                         maxSize = tradesize),
+#        type = "enter")
 
 
 # ===============================================================
