@@ -75,8 +75,8 @@ portfolio.st <- "firststrat"
 # 3) account
 account.st <- "firststrat"
 
-# Remove the existing strategy if it exists
-rm.strat("strategy.st")
+# 1.5 Remove the existing strategy if there is one
+rm.strat(strategy.st)
 
 
 # ===============================================================
@@ -220,7 +220,6 @@ test_subset <- test["2016-11-05/2016-11-09"]
 # 5. Signals - add.signal()
 # ===============================================================
 # In this strategy, 4 types of signal will be used
-# ===============================================================
 # 5.1 sigComparison
 # Signify whether SMA50 > SMA200
 add.signal(strategy = strategy.st, name = "sigComparison",
@@ -229,7 +228,7 @@ add.signal(strategy = strategy.st, name = "sigComparison",
                             # Discover whether the SMA50 is greater than SMA200
                             relationship = "gt"),
            # Label this signal "longfilter"
-           label = "longfilter"
+           laber = "longfilter"
            )
 # 5.2 sigCrossover
 # Signify whether SMA50 < SMA200
@@ -237,8 +236,7 @@ add.signal(strategy = strategy.st, name = "sigCrossover",
            arguments = list(columns = c("SMA50", "SMA200"),
                             # Discover when the SMA50 crosses under the SMA200
                             relationship = "lt"),
-           label = "filterexit"
-           )
+           label = "filterexit")
 # 5.3 sigThreshold
 # Specify that DVO_2_126 < 20
 add.signal(strategy = strategy.st, name = "sigThreshold",
@@ -250,8 +248,7 @@ add.signal(strategy = strategy.st, name = "sigThreshold",
                             relationship = "lt",
                             # Interest in oscillator < 20
                             cross = FALSE),
-           label = "longthreshold"
-           )
+           label = "longthreshold")
 # 5.3.1 sigThreshold2
 # Signal when DVO_2_126 crosses above 80
 add.signal(strategy = strategy.st, name = "sigThreshold",
@@ -263,8 +260,7 @@ add.signal(strategy = strategy.st, name = "sigThreshold",
                             relationship = "gt",
                             # Interest in the cross
                             cross = TRUE),
-           label = "thresholdexit"
-           )
+           label = "thresholdexit")
 # 5.4 sigFormula - add.signal() & applyIndicators()
 # Combine various indicators and signals already added to the strategy 
 # in order to create composite signals. A function uses string evaluation 
@@ -278,131 +274,6 @@ add.signal(strategy = strategy.st, name = "sigFormula",
                             cross = TRUE),
            label = "longentry"
            )
-
-
-# ===============================================================
-# 6. Rules - add.rule()
-# ===============================================================
-# Add trading rules to enter/exit an asset based on the trading 
-# signals. Like signals and indicators, all rules reference a 
-# column already present in the strategy.
-# Rules relies on signals and must reference the signal columns
-# in the strategy to work right.
-# ===============================================================
-# 6.1 Exit Rule
-add.rule(strategy = strategy.st, name = "ruleSignal",
-         arguments = list(
-           # Use the signal "filterexit" set in the strategy:
-           # the SMA50 has crossed under SMA200
-           # Rule for this signal indicating the condition to exit 
-           # as the market is no longer conducive to the position.
-           sigcol = "filterexit",
-           # Specifying sigval to indicate whether the rule is triggered 
-           # when the signal value is TRUE or FALSE.
-           # To proceed with this exit rule, specify that a transaction
-           # should occcur when filterexit is equal to TRUE.
-           sigval = TRUE,
-           # orderqty: Set to "all" for liquidation of asset or
-           # set to an integer value of a number of shares
-           orderqty = "all",
-           # ordertype: 
-           # "market" for buy or sell the asset at the prevailing price.
-           # "limit" for certain price conditions are met (namely, if the price 
-           # falls below a certain further threshold on the day of the order)
-           # "stoplimit" for when price above a certain price
-           ordertype = "market",
-           # orderside:
-           # "long" is to classify a set of rules that profits by buying an asset 
-           # in the hopes that the asset's price will rise. 
-           # "short" is one that shorts a stock by selling an asset before owning it, 
-           # hoping to buy it back later at a lower price.
-           orderside = "long",
-           # replace when set to TRUE will cancel other signals in the strategy.
-           # set to FALSE is the good rule of thumb to keep other signals.
-           # Specifies whether or not to ignore all other signals on the same date 
-           # when the strategy acts upon one signal.
-           replace = FALSE,
-           # prefer indicates when it is favourable to enter a position. 
-           # Default is set to buy at the close of next day (bar).
-           # In Quantstrat, orders have a "next-bar" mechanism. There is a day lag
-           # bewteen observing signal and buying next day.
-           # This can be solved by placing orders to execute on the next
-           # possible bar: Open, High, Low, or Close price
-           prefer = "Open"),
-         type = "exit")
-# 6.2 Enter Rule
-# Create an entry rule of 1 share when all conditions line up
-add.rule(strategy = strategy.st, name = "ruleSignal",
-         arguments = list(
-           # Use the signal longentry set in the strategy:
-           # Specify that both longfilter and longthreshold must be TRUE
-           sigcol = "longentry",
-           # Set sigval to TRUE
-           sigval = TRUE,
-           # Set orderqty to 1
-           orderqty = 1,
-           ordertype = "market",
-           orderside = "long",
-           replace = FALSE,
-           prefer = "Open"),
-         type = "enter")
-# 6.3 Enter Rule with Order Sizing Function
-add.rule(strategy = strategy.st, name = "ruleSignal",
-         arguments = list(
-           sigcol = "longentry",
-           sigval = TRUE,
-           ordertype = "market",
-           orderside = "long",
-           replace = FALSE,
-           prefer = "Open",
-           # Use the osMaxDollar order size function
-           # osFUN - the constructs that allow quantstrat to vary the amount 
-           # of shares bought or sold are called order sizing functions. 
-           # The first thing to know is that when using an order sizing function, 
-           # the orderqty argument is no longer relevant, as the order quantity 
-           # is determined by the order sizing function, osFUN. The additional 
-           # arguments to this function are tradeSize and maxSize, both of which 
-           # should take tradesize, which we defined early on in our code.
-           orderqty = osMaxDollar(
-             portfolio = portfolio.st,
-             tradeSize = tradesize,
-             maxSize = tradesize)),
-         type = "enter"
-         )
-
-
-# ===============================================================
-# 7. Analyse - applyStrategy()
-# ===============================================================
-# Analysing the strategy is the last step in a quantstrat strategy.
-# Indicators:
-# This strategy requires both the threshold of the DVO_2_126 indicator 
-# to be under 20 and the SMA50 to be greater than the SMA200. 
-# This strategy sells when the DVO_2_126 crosses above 80, or 
-# the SMA50 crosses under the SMA200.
-# Signals:
-# Set up five separate signals for this strategy to work properly:
-# sigComparison for SMA50 being greater than SMA200;
-# sigThreshold with cross set to FALSE for DVO_2_126 less than 20;
-# sigFormula to tie them together and set cross to TRUE;
-# sigCrossover with SMA50 less than SMA200; and
-# sigThreshold with cross set to TRUE for DVO_2_126 greater than 80.
-# ===============================================================
-# The strategy invests $100,000 (the initeq) into each trade, and 
-# may have some small dollar cost averaging if the DVO_2_126 oscillates 
-# around 20 (though the effect is mostly negligible compared to the 
-# initial allocation)(?-I don't quite understand).
-# ===============================================================
-# Use applyStrategy() to apply your strategy. Save this to out
-out <- applyStrategy(strategy = strategy.st, portfolios = portfolio.st)
-# Use updateProf() to update portfolio.st
-updatePortf(portfolio.st)
-# Set the date range
-daterange <- time(getPortfolio(portfolio.st)$summary)[-1]
-# Use updateAcct() to update account.st with daterange
-updateAcct(account.st, daterange)
-updateEndEq(account.st)
-
 
 
 
