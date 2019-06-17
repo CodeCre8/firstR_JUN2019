@@ -228,7 +228,7 @@ add.signal(strategy = strategy.st, name = "sigComparison",
                             # Discover whether the SMA50 is greater than SMA200
                             relationship = "gt"),
            # Label this signal "longfilter"
-           laber = "longfilter"
+           label = "longfilter"
            )
 # 5.2 sigCrossover
 # Signify whether SMA50 < SMA200
@@ -344,7 +344,37 @@ add.rule(strategy = strategy.st, name = "ruleSignal",
          type = "enter")
 
 
-
+# ===============================================================
+# 7. Analyse - applyStrategy()
+# ===============================================================
+# Analysing the strategy is the last step in a quantstrat strategy.
+# Indicators:
+# This strategy requires both the threshold of the DVO_2_126 indicator 
+# to be under 20 and the SMA50 to be greater than the SMA200. 
+# This strategy sells when the DVO_2_126 crosses above 80, or 
+# the SMA50 crosses under the SMA200.
+# Signals:
+# Set up five separate signals for this strategy to work properly:
+# sigComparison for SMA50 being greater than SMA200;
+# sigThreshold with cross set to FALSE for DVO_2_126 less than 20;
+# sigFormula to tie them together and set cross to TRUE;
+# sigCrossover with SMA50 less than SMA200; and
+# sigThreshold with cross set to TRUE for DVO_2_126 greater than 80.
+# ===============================================================
+# The strategy invests $100,000 (the initeq) into each trade, and 
+# may have some small dollar cost averaging if the DVO_2_126 oscillates 
+# around 20 (though the effect is mostly negligible compared to the 
+# initial allocation)(?-I don't quite understand).
+# ===============================================================
+# Use applyStrategy() to apply your strategy. Save this to out
+out <- applyStrategy(strategy = strategy.st, portfolios = portfolio.st)
+# Use updateProf() to update portfolio.st
+updatePortf(portfolio.st)
+# Set the date range
+daterange <- time(getPortfolio(portfolio.st)$summary)[-1]
+# Use updateAcct() to update account.st with daterange
+updateAcct(account.st, daterange)
+updateEndEq(account.st)
 
 
 
