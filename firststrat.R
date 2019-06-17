@@ -389,15 +389,61 @@ updateEndEq(account.st)
 tstats <- tradeStats(portfolio.st)
 # Print the profit factors
 str(tstats)
+print(tstats$Profit.Factor)
 # Print tstats
 print(tstats)
 
 
+# Visualization
+
+# ===============================================================
+# Basic visualization before adding indicators
+# ===============================================================
+# Compute the SMA50
+sma50 <- SMA(x = Cl(mktdata), n = 50)
+# Compute the SMA200
+sma200 <- SMA(x = Cl(mktdata), n = 200)
+# Compute the DVO_2_126 with an navg of 2 and a percentlookback of 126
+dvo <- DVO(HLC = HLC(SPY), navg = 2, percentlookback = 126)
+# Use chart.Posn to view your system's performance on SPY
+chart.Posn(Portfolio = portfolio.st, Symbol = "SPY")
+# Overlay the SMA50 on the plot as a blue line
+add_TA(sma50, on = 1, col = "blue")
+# Overlay the SMA200 on the plot as a red line
+add_TA(sma200, on=1, col = "red")
+# Overlay DVO on the plot as a green line
+add_TA(dvo)
 
 
+# ===============================================================
+# Cash Sharpe ratio
+# ===============================================================
+# When working with cash profit and loss statistics, quantstrat 
+# offers a way to compute a Sharpe ratio not just from returns, 
+# but from the actual profit and loss statistics themselves.
+# ===============================================================
+# A Sharpe ratio is a metric that compares the average reward 
+# to the average risk taken. Generally, a Sharpe ratio above 1 
+# is a marker of a strong strategy.
+# ===============================================================
+# The P&L Time Series allows us to take the sharpe ratio 
+# i.e. the ratio of reward to risk from our strategy.
+# ===============================================================
 
+# Compute standard returns-based Sharpe ratio
+# Get instrument returns
+instrets <- PortfReturns(portfolio.st)
+# Compute Sharpe ratio from returns
+SharpeRatio.annualized(instrets, geometric = FALSE)
+###                                   SPY.DailyEqPL
+###Annualized Sharpe Ratio (Rf=0%)     0.2833426
 
-
-
-
+# Compute Sharpe ratio based on P&L
+# Trading P&L (profit and loss), one can compute a Sharpe ratio 
+# based on these metrics. The code below can be used to compute 
+# the Sharpe ratio based off of P&L.
+portpl <- .blotter$portfolio.firststrat$summary$Net.Trading.PL
+SharpeRatio.annualized(portpl, geometric=FALSE)
+###                                   Net.Trading.PL
+###Annualized Sharpe Ratio (Rf=0%)      0.2832393
 
