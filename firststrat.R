@@ -150,7 +150,7 @@ calc_RSI_avg <- function(price, n1, n2) {
   # RSI_avg is the avg of RSI_1 and RSI_2
   RSI_avg <- (RSI_1 + RSI_2) / 2
   # The output of RSI_avg needs a column
-  column(price) <- "RSI_avg"
+  colnames(price) <- "RSI_avg"
   # Return price
   return(price)
 }
@@ -199,6 +199,24 @@ add.indicator(strategy = strategy.st,
               name = "DVO",
               arguments = list(HLC = quote(HLC(mktdata)), navg = 2, percentlookback = 126),
               label = "DVO_2_126")
+
+
+# ===============================================================
+# Test the indicators - test
+# ===============================================================
+# Use applyIndicators to test the indicators in the strategy
+test <- applyIndicators(strategy = strategy.st, mktdata = OHLC(SPY))
+# Remove test and create again
+rm(mktdata,test)
+test <- applyIndicators(strategy = strategy.st, mktdata = OHLC(SPY))
+# Subset the data between November 5th and 9th of 2013
+test_subset <- test["2013-11-05/2013-11-09"]
+# Remove subset because the dates yielded nothing. Use new dates
+rm(test_subset)
+test_subset <- test["2016-11-05/2016-11-09"]
+
+
+
 
 
 
