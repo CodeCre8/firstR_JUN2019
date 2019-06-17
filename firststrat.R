@@ -13,7 +13,7 @@ library(blotter)
 
 
 # ===============================================================
-# Testing
+# Testing RStudio
 # ===============================================================
 # The closing price of SPY over the past 4.5 years.
 getSymbols("SPY",
@@ -38,7 +38,7 @@ lines(SMA(Cl(SPY), n = 200), col = "blue")
 
 
 # ===============================================================
-# 1. Define Initialization Settings
+# 1. Initialization Sittings
 # ===============================================================
 # Date and Time Paremeters - creat initdate, from, and to strings
 initdate <- "2010-01-01"
@@ -94,7 +94,7 @@ strategy(strategy.st, store = TRUE)
 
 
 # ===============================================================
-# 3. Create and Add 5 indicators for trading strategy
+# 3. Indicators - add.indicator()
 # ===============================================================
 # This strategy will incorporate a combination of 
 # basic moving average crossover and RSI as an oscillation indicator.
@@ -202,7 +202,7 @@ add.indicator(strategy = strategy.st,
 
 
 # ===============================================================
-# Test the indicators - test
+# 4. Test - applyIndicators()
 # ===============================================================
 # Use applyIndicators to test the indicators in the strategy
 test <- applyIndicators(strategy = strategy.st, mktdata = OHLC(SPY))
@@ -214,6 +214,77 @@ test_subset <- test["2013-11-05/2013-11-09"]
 # Remove subset because the dates yielded nothing. Use new dates
 rm(test_subset)
 test_subset <- test["2016-11-05/2016-11-09"]
+
+
+# ===============================================================
+# 5. Signals - add.signal()
+# ===============================================================
+# In this strategy, 4 types of signal will be used
+# 5.1 sigComparison
+# Signify whether SMA50 > SMA200
+add.signal(strategy = strategy.st, name = "sigComparison",
+           # Look at the relationship between the SMA50 & SMA200
+           arguments = list(columns = c("SMA50", "SMA200"),
+                            # Discover whether the SMA50 is greater than SMA200
+                            relationship = "gt"),
+           # Label this signal "longfilter"
+           laber = "longfilter"
+           )
+# 5.2 sigCrossover
+# Signify whether SMA50 < SMA200
+add.signal(strategy = strategy.st, name = "sigCrossover",
+           arguments = list(columns = c("SMA50", "SMA200"),
+                            # Discover when the SMA50 crosses under the SMA200
+                            relationship = "lt"),
+           label = "filterexit")
+# 5.3 sigThreshold
+# Specify that DVO_2_126 < 20
+add.signal(strategy = strategy.st, name = "sigThreshold",
+           # Use the column DVO_2_126
+           arguments = list(column = "DVO_2_126",
+                            # Set threshold to 20
+                            threshold = 20,
+                            # Set oscillator to be under the value
+                            relationship = "lt",
+                            # Interest in oscillator < 20
+                            cross = FALSE),
+           label = "longthreshold")
+# 5.3.1 sigThreshold2
+# Signal when DVO_2_126 crosses above 80
+add.signal(strategy = strategy.st, name = "sigThreshold",
+           # Use the column DVO_2_126
+           arguments = list(column = "DVO_2_126",
+                            # Set threshold to 80
+                            threshold = 80,
+                            # Set oscillator to greater than 80
+                            relationship = "gt",
+                            # Interest in the cross
+                            cross = TRUE),
+           label = "thresholdexit")
+# 5.4 sigFormula - add.signal() & applyIndicators()
+# Combine various indicators and signals already added to the strategy 
+# in order to create composite signals. A function uses string evaluation 
+# to offer immense flexibility
+test_init <- applyIndicators(strategy = strategy.st, mktdata = OHLC(SPY))
+test <- applySignals(strategy = strategy.st, mktdata = test_init)
+add.signal(strategy = strategy.st, name = "sigFormula",
+           # Specify that both longfilter and longthreshold must be TRUE
+           arguments = list(formula = "longfilter & longthreshold",
+                            # Set cross to be TRUE
+                            cross = TRUE),
+           label = "longentry"
+           )
+
+
+
+
+
+
+
+
+
+
+
 
 
 
