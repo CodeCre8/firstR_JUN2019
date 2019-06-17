@@ -363,10 +363,7 @@ add.rule(strategy = strategy.st, name = "ruleSignal",
            # is determined by the order sizing function, osFUN. The additional 
            # arguments to this function are tradeSize and maxSize, both of which 
            # should take tradesize, which we defined early on in our code.
-           orderqty = osMaxDollar(
-             portfolio = portfolio.st,
-             tradeSize = tradesize,
-             maxSize = tradesize)),
+           osFUN = "osMaxDollar"),
          type = "enter"
          )
 
