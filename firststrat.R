@@ -377,9 +377,20 @@ updateAcct(account.st, daterange)
 updateEndEq(account.st)
 
 
+# View Trade Performance
 
-
-
+# ===============================================================
+# 1. View portfolio performance with tradeStats()
+# ===============================================================
+# A profit factor above 1 means the strategy is profitable. 
+# A profit factor below 1 means I am losing money!
+# ===============================================================
+# Get the tradeStats for the portfolio.st
+tstats <- tradeStats(portfolio.st)
+# Print the profit factors
+str(tstats)
+# Print tstats
+print(tstats)
 
 
 
